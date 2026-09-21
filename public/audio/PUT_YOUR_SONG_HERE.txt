@@ -1,0 +1,2 @@
+Put your song file here as dedication.mp3
+Then set content.song.audioSrc if you use a different filename.
