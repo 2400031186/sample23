@@ -1,28 +1,53 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { SceneShell } from '../components/SceneShell'
 import { GoldButton } from '../components/ui'
 import { content } from '../content'
-import { playSoftClick, playSparkle } from '../lib/sounds'
+import { playSoftClick, playSparkle, unlockAudio } from '../lib/sounds'
 
 export function Memories({ onNext }: { onNext: () => void }) {
+  const audioRef = useRef<HTMLAudioElement | null>(null)
   const items = content.memories.items
   const [opened, setOpened] = useState<number[]>([])
   const [active, setActive] = useState<number | null>(null)
   const allOpened = opened.length === items.length
 
+  useEffect(() => {
+    return () => {
+      const audio = audioRef.current
+      if (audio) {
+        audio.pause()
+        audio.currentTime = 0
+      }
+    }
+  }, [])
+
+  const startMemoryMusic = async () => {
+    try {
+      unlockAudio()
+      const audio = audioRef.current
+      if (!audio) return
+      audio.volume = 0.6
+      await audio.play()
+    } catch {
+      /* audio is optional */
+    }
+  }
+
   const markOpened = (index: number) => {
     setOpened((prev) => (prev.includes(index) ? prev : [...prev, index]))
   }
 
-  const open = (index: number) => {
+  const open = async (index: number) => {
     playSoftClick()
+    await startMemoryMusic()
     setActive(index)
     markOpened(index)
   }
 
   return (
     <SceneShell>
+      <audio ref={audioRef} src={content.memories.audioSrc} preload="auto" loop />
       <div className="flex h-full w-full max-w-4xl flex-col items-center pt-2">
         <h2 className="font-serif text-3xl text-[var(--ivory)] sm:text-4xl">
           {content.memories.title}
@@ -35,16 +60,23 @@ export function Memories({ onNext }: { onNext: () => void }) {
           {items.map((item, index) => {
             const seen = opened.includes(index)
             const isVideo = item.mediaType === 'video'
+            const isBeginning = item.number === '01'
             return (
               <motion.button
                 key={item.number}
                 type="button"
-                onClick={() => open(index)}
+                onClick={() => void open(index)}
                 className="memory-frame group overflow-hidden rounded-2xl text-left"
                 whileHover={{ y: -6 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <div className="relative aspect-[16/10] overflow-hidden sm:aspect-[4/5]">
+                <div
+                  className={
+                    isBeginning
+                      ? 'relative aspect-[4/5] overflow-hidden sm:aspect-[4/5]'
+                      : 'relative aspect-[16/10] overflow-hidden sm:aspect-[4/5]'
+                  }
+                >
                   {isVideo ? (
                     <video
                       src={item.video}
@@ -53,13 +85,17 @@ export function Memories({ onNext }: { onNext: () => void }) {
                       loop
                       playsInline
                       autoPlay
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      className={`h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 ${
+                        isBeginning ? 'object-[center_24%]' : 'object-center'
+                      }`}
                     />
                   ) : (
                     <img
                       src={item.photo}
                       alt={item.title}
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      className={`h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 ${
+                        isBeginning ? 'object-[center_24%]' : 'object-center'
+                      }`}
                     />
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent" />
@@ -132,6 +168,7 @@ function MemoryLightbox({
   if (!item) return null
 
   const isVideo = item.mediaType === 'video'
+  const isBeginning = item.number === '01'
 
   return (
     <motion.div
@@ -155,10 +192,18 @@ function MemoryLightbox({
             controls
             playsInline
             autoPlay
-            className="max-h-[52dvh] w-full object-cover sm:max-h-none sm:aspect-[4/5]"
+            className={`max-h-[52dvh] w-full object-cover sm:max-h-none sm:aspect-[4/5] ${
+              isBeginning ? 'object-[center_24%]' : 'object-center'
+            }`}
           />
         ) : (
-          <img src={item.photo} alt={item.title} className="max-h-[52dvh] w-full object-cover sm:max-h-none sm:aspect-[4/5]" />
+          <img
+            src={item.photo}
+            alt={item.title}
+            className={`max-h-[52dvh] w-full object-cover sm:max-h-none sm:aspect-[4/5] ${
+              isBeginning ? 'object-[center_24%]' : 'object-center'
+            }`}
+          />
         )}
         <div className="bg-[var(--dusk)]/95 px-6 py-5">
           <p className="text-[11px] tracking-[0.28em] text-[var(--gold)]">

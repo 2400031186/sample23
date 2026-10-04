@@ -63,6 +63,7 @@ export const content = {
     title: 'Three little pieces of our story…',
     continueLabel: 'Continue ❤️',
     hint: 'Open each one',
+    audioSrc: '/audio/dedication1.mp3',
     items: [
       {
         number: '01',
@@ -94,23 +95,21 @@ export const content = {
 
   song: {
     kicker: 'This song reminds me of you…',
-    title: 'The Metro Proposal',
-    artist: 'Sai Abhyankar',
+    title: 'Uppenantha',
+    artist: 'K.K',
     /**
      * Put your audio file here:
      *   public/audio/dedication.mp3
      * Do not autoplay — she presses play.
      */
-    audioSrc: '/audio/dedication.mp3',
+    audioSrc: '/audio/dedication.mp3.mpeg',
     /**
      * These are ORIGINAL dedication lines — not song lyrics.
      * If you have permission to quote a short authorized excerpt,
      * replace the three strings below with that excerpt (keep it short).
      * Do not paste the full lyrics of the song.
      */
-    dedicationLines: [
-      'ee bgm vina prathi sari nuvve gurthosthav… endhuku ante, I really see a lot of love in those eyes. may be ee bgm manakosame petaru emo anipistundhi.',
-    ],
+    dedicationLines: [],
     continueLabel: 'Continue ❤️',
   },
 
